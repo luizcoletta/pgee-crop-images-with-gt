@@ -67,6 +67,9 @@ for a in range(larg):
         cv2.waitKey(0)
         length += tam_c
 
+        #### FAZER AQUI EMBAIXO O MESMO COM IMAGEM QUE SE REFERE AO GT
+        #### DIVIDIR EM PASTAS 'annotations' e 'images'
+
     row += tam_l
 
 
