@@ -1,67 +1,106 @@
-import os
-import numpy as np
+import arff  # Library https://pypi.org/project/liac-arff/. For read/write arff files
 import cv2
+import numpy as np
+import os
 import math
-from PIL import Image
-from Process import image_process
 # https://stackoverflow.com/questions/3430372/how-do-i-get-the-full-path-of-the-current-files-directory
 curr_dir = os.path.dirname(os.path.abspath(__file__))
 
+'''# Retrieve the dicc from file arff
+data_file_name = "ceratocystis_test_90_10_rgb_11_fs9_res20-Indexes.arff"
+data_path = curr_dir + "/data/" + data_file_name
+data = arff.load(open(data_path))'''
 
+# Convert dicc to list. Only the data
+'''lst_data = list(data.values())[3]
+
+# Convert list to numeric int array
+lst_data = np.array(lst_data)
+num_data = lst_data.astype(float)
+num_data = np.around(num_data)
+num_data = num_data.astype(int)''' #não utilizar
+
+# Get dir name from file arff
+ #dirDataName = data_file_name[data_file_name.index("res"):data_file_name.index("-")]
+# Load imgs
+# le a matriz (imagem)
 # colocar o nome da imagem que se deseja utilizar
+data_name = 'Fake.png'
 
-data_name = 'DJI_0280-1x0'
 # tamanho desejado da largura x comprimento
-tam_l = 224
-tam_c = 224
+tam_l = 50
+tam_c = 50
 
+# prepara o nome para a pasta e novas imagens
+img_cont = (len(data_name))*-1
+img_name = data_name[img_cont:data_name.find('.')]
+img = cv2.imread('images/'+data_name)
 
-label_name = (data_name.replace('-',  'L'))+'.png'
-im = Image.open('images/'+data_name+'/'+label_name)
-img1 = np.array(im)
-im = Image.fromarray(img1)
-caminho_annot = 'images/'+data_name+'/'+data_name+'gt.png'
-im.save(caminho_annot)
-
-
-name = data_name+'.png'
-img = cv2.imread('images/'+data_name+'/'+name)
-annot = cv2.imread('images/'+data_name+'/'+data_name+'gt.png')
-
-
+# amazena os valores largura e comprimento
 s = img.shape
 tam_larg = s[0]
-larg = math.floor(tam_larg / tam_l)
+larg = math.floor(tam_larg/tam_l)
 tam_comp = s[1]
-comp = math.floor(tam_comp / tam_c)
-row =0
+comp = math.floor(tam_comp/tam_c)
+
+# acumalador para a largura
+row = 0
+
 for a in range(larg):
     # acumalador para o comprimento
     length = 0
     for b in range(comp):
         if b < 1:
             cropped_img = img[row:row + tam_l, length:length + tam_c]
-            cropped_annot = annot[row:row + tam_l, length:length + tam_c]
         else:
-            cropped_img = img[row:row + tam_l, length + 1:length + tam_c + 1]
-            cropped_annot = annot[row:row + tam_l, length + 1:length + tam_c + 1]
-        imgName = f'{data_name}{"-"}{a}{"x"}{b}'
-        annotName = f'{data_name}{"-"}{a}{"x"}{b}'
-        dirname = 'results/' + data_name + '/images'
-        dirname2 = 'results/' + data_name + '/annotation'
+            cropped_img = img[row:row + tam_l,length + 1:length + tam_c + 1]
+        imgName = f'{img_name}{"-"}{a}{"x"}{b}'
+        dirname = 'results/' + img_name + '/images'
+
         if os.path.isdir(dirname):
             pass
         else:
             os.makedirs(dirname)
-        if os.path.isdir(dirname2):
-            pass
-        else:
-            os.makedirs(dirname2)
 
         # Save img not labeled
         cv2.imwrite(os.path.join(dirname, str(imgName) + '.png'), cropped_img)
-        cv2.imwrite(os.path.join(dirname2, str(annotName) + '.png'), cropped_annot)
         cv2.waitKey(0)
         length += tam_c
 
+        #### FAZER AQUI EMBAIXO O MESMO COM IMAGEM QUE SE REFERE AO GT
+        #### DIVIDIR EM PASTAS 'annotations' e 'images'
+
     row += tam_l
+
+
+
+"""for l in num_data:
+
+    # Get name for imgs cut
+    imgName = f'{dirDataName}_{l[1]}_{l[2]}_{l[-1]}'
+    # renomear com  DJI_0492-1x2, com os indices do for
+
+    # Img not labeled
+
+    cropped_img = img[l[1]:l[1] + 160, l[2]:l[2] + 192]  # img[start_row:end_row, start_col:end_col]
+
+    # Create folder, if not exists
+    dirname = 'results/' + 'Drone_492' + '/images'
+    if os.path.isdir(dirname):
+        pass
+    else:
+        os.makedirs(dirname)
+    # Save img not labeled
+    cv2.imwrite(os.path.join(dirname, str(imgName) + '.png'), cropped_img)
+    cv2.waitKey(0)"""
+
+    # Img labeled
+    # cropped_imgLabeled = imgLabeled[l[1]:l[1] + 10, l[2]:l[2] + 10]  # img[start_row:end_row, start_col:end_col]
+    # Create folder, if not exists
+    # dirname = 'results/' + dirDataName + '/annotations'
+    # if os.path.isdir(dirname):
+    # else:
+     #   os.makedirs(dirname)
+    # Save img labeled
+    # cv2.imwrite(os.path.join(dirname, str(imgName) + '.png'), cropped_imgLabeled)
+   # cv2.waitKey(0)
